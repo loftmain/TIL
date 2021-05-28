@@ -1,4 +1,4 @@
-# pd.factorize()
+# categorical 변수로 변경해주는 pd.factorize() 함수
 
 ---
 input으로 들어온 값을 범주형 변수로 인코딩합니다.
