@@ -30,7 +30,7 @@
  - [문자열 속 표현식 인식하기](python/문자열-속-표현식-인식.md)
  - [함수: LEGB 규칙](python/함수-LEGE-규칙.md)
  - [함수 안에 함수](python/함수-안에-함수.md)
-
+ - [sorted() - 딕셔너리 안에 딕셔러니 정렬하기](python/sorted-딕셔너리안에-딕셔너리-정렬하기.md)
 ### pandas
 
  - [categorical 변수로 변경해주는 pd.factorize() 함수](pandas/categorical-변수로-변경해주는-factorize().md)
