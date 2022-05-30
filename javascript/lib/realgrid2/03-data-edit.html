@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link href="/lib/realgrid-style.css" rel="stylesheet" />
+		<script type="text/javascript" src="/lib/realgrid-lic.js"></script>
+		<script type="text/javascript" src="/lib/realgrid.2.3.3.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-3.4.0.min.js"></script>
+	</head>
+	<body>
+        <div>
+            <button onclick="do_commit()">Commit</button>
+            <button onclick="do_delete()">Delete</button>
+        </div>
+
+		<div id="realgrid" style="width: 100%; height: 440px;">
+		</div>
+	</body>
+</html>
+
+<script>
+    const provider = new RealGrid.LocalDataProvider();
+    const gridView = new RealGrid.GridView("realgrid");
+    gridView.setDataSource(provider);
+
+    function do_commit() {
+        // 행 추가
+        gridView.commit();
+    }
+
+    function do_delete() {
+        // 행 삭제
+        //gridView.deleteSelection(); // alert 있는 방식
+        gridView.deleteSelection(true); // alert 없이 삭제
+
+    }
+
+	document.addEventListener("DOMContentLoaded", function () {
+
+        gridView.editOptions.insertable = true; // INSERT 키 가능 옵션
+        gridView.editOptions.appendable = true; // 맨 밑에서 방향키로 INSERT 가능 옵션
+        gridView.editOptions.deletable = true; // DELETE 키 눌러서 삭제 가능 옵션
+        gridView.editOptions.deleteRowsMessage = "진짜?"; // 삭제시 alert 메시지 변경
+
+        // gridView.editOptions.editable = false; // 더블클릭으로 수정 가능 여부
+
+        //데이터가 변경되기 전 변경사항을 검사해서 데이터를 저장할지 말지 결정하는 기능
+        provider.onRowUpdating = function(p, row) {
+            var item = gridView.getEditingItem(); // editing 되고있는 객체 가져옴
+            if (item) {
+                if (item.values["id"] < 0) {
+                    setTimeout(function() {
+                        alert("id는 0보다 커야 합니다.");
+                    }, 10);
+                    return false; // editing 되고 있는 작업이 취소됨.
+                }
+            }
+            return true;
+        }
+
+        // 데이터의 변화된 값을 JSON으로 변경하여 사용하기
+        // 이것을 활용해서 Rest API 서버에 전송하도록 활용하면 됨.ㄴ
+        provider.onRowUpdated = function (p, row) {
+            var r = provider.getJsonRow(row);
+            alert(JSON.stringify(r));
+        }
+
+        provider.setFields([
+			{ fieldName: "id",    dataType: "number" },
+			{ fieldName: "title", dataType: "text"   },
+		]);
+
+		gridView.setColumns([
+			{
+				name: "id",    fieldName: "id",    width: 50,
+				header: {
+					text: "번호",
+				},
+			},
+			{
+				name: "title", fieldName: "title", width: 400,
+				header: {
+					text: "제목",
+				},
+			},
+		]);
+
+		$.getJSON("https://jsonplaceholder.typicode.com/posts", function (data) {
+			console.log(data);
+			provider.fillJsonData(data, { fillMode: "set" });
+		});
+	});
+</script>

@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link href="/lib/realgrid-style.css" rel="stylesheet" />
+		<script type="text/javascript" src="/lib/realgrid-lic.js"></script>
+		<script type="text/javascript" src="/lib/realgrid.2.5.2.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-3.4.0.min.js"></script>
+	</head>
+	<body>
+        <div>
+            <button onclick="setFiltering(true)">필터 켜기</button>
+            <button onclick="setFiltering(false)">필터 끄기</button>
+            <button onclick="autoFiltering()">자동 필터링</button>
+            <button onclick="filterByGender()">필터 등록</button>
+            <button onclick="clearFilter()">필터 삭제</button>
+        </div>
+        <br>
+
+		<div id="realgrid" style="width: 100%; height: 440px;">
+		</div>
+	</body>
+</html>
+
+<script>
+    const provider = new RealGrid.LocalDataProvider();
+    const gridView = new RealGrid.GridView("realgrid");
+    gridView.setDataSource(provider);
+
+    provider.setFields([
+        { fieldName: "KorName",    dataType: "text"     },
+        { fieldName: "Gender",     dataType: "text"     },
+        { fieldName: "Age",        dataType: "number"   },
+        { fieldName: "Phone",      dataType: "text"     },
+        { fieldName: "ProductId",  dataType: "text"     },
+        { fieldName: "KorCountry", dataType: "text"     },
+        { fieldName: "OrderDate",  dataType: "datetime" },
+    ]);
+
+    gridView.setColumns([
+        { name: "KorName",    fieldName: "KorName",    width:  "80" },
+        { name: "Gender",     fieldName: "Gender",     width:  "60" },
+        { name: "Age",        fieldName: "Age",        width:  "60" },
+        { name: "Phone",      fieldName: "Phone",      width: "120" },
+        { name: "ProductId",  fieldName: "ProductId",  width: "120" },
+        { name: "KorCountry", fieldName: "KorCountry", width: "100" },
+        { name: "OrderDate",  fieldName: "OrderDate",  width:  "80" },
+    ]);
+
+    const data_url = "https://raw.githubusercontent.com/realgrid/open-tutorial/main/datas/data-001.json";
+    $.getJSON(data_url, function (data) {
+        console.log(data);
+        provider.fillJsonData(data, { fillMode: "set" });
+    });
+
+    function setFiltering(value) {
+        gridView.setFilteringOptions({enabled: value});
+    }
+
+    // 오토 필터링 설정하기 
+    function autoFiltering() {
+        // KorCountry안에 있는 중복 제거된 값을 가지고 와서 필터링함.
+        gridView.setColumnProperty("KorCountry", "autoFilter", true); 
+    }
+
+    // 커스텀 필터
+    function filterByGender() {
+        const filters = [
+            {
+                name: "남", // 필터 이름
+                criteria: "value = '남'", // 필터가 클릭됬을 때 어떤 값을 찾아야되는지 기준점
+            },
+            {
+                name: "여", // 필터 이름
+                criteria: "value = '여'", // 필터가 클릭됬을 때 어떤 값을 찾아야되는지 기준점
+            }
+        ];
+        gridView.setColumnFilters("Gender", filters);
+    }
+
+    // 필터 삭제
+    function clearFilter() {
+        gridView.clearColumnFilters("Gender");
+        gridView.setColumnProperty("KorCountry", "autoFilter", false); 
+    }
+</script>

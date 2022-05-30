@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link href="/lib/realgrid-style.css" rel="stylesheet" />
+		<script type="text/javascript" src="/lib/realgrid-lic.js"></script>
+		<script type="text/javascript" src="/lib/realgrid.2.5.2.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-3.4.0.min.js"></script>
+	</head>
+	<body>
+        <div>
+            <button onclick="setSorting(true)">소팅 켜기</button>
+            <button onclick="setSorting(false)">소팅 끄기</button>
+            <button onclick="sortByNameAndUserName()">name + username 소팅</button>
+            <button onclick="resetSorting()">소팅 초기화</button>
+        </div>
+        <br>
+        <div>
+            <button onclick="setSortingType('none')">none</button>
+            <button onclick="setSortingType('exclusive')">exclusive</button>
+            <button onclick="setSortingType('inclusive')">inclusive</button>
+            <button onclick="setSortingType('reverse')">reverse</button>
+
+        </div>
+
+		<div id="realgrid" style="width: 100%; height: 440px;">
+		</div>
+	</body>
+</html>
+
+<script>
+    const provider = new RealGrid.LocalDataProvider();
+    const gridView = new RealGrid.GridView("realgrid");
+    gridView.setDataSource(provider);
+
+    function setSorting(value) {
+        gridView.sortingOptions.enabled = value;
+    }
+
+    function sortByNameAndUserName() {
+        gridView.orderBy( // 세로로 한 묶음
+            ['name', 'username'],  //소팅할 컬럼 이름(복수 가능)
+            ['ascending', 'descending'], //오름차순, 내림차순 선택
+            ['insensitive', 'sensitive'] //대소문자 구별 유무
+        );
+    }
+
+    function resetSorting() { // 소팅 리셋하기
+        gridView.orderBy([], [], []); // null로 넣어줌.
+    }
+
+    //소팅 허용, 금지 컬럼 추가
+    function setSortingType(value) {
+        gridView.sortingOptions.style = value;
+    }
+
+	document.addEventListener("DOMContentLoaded", function () {
+		provider.setFields([
+			{ fieldName: "id",       dataType: "number" },
+			{ fieldName: "name",     dataType: "text"   },
+			{ fieldName: "username", dataType: "text"   },
+			{ fieldName: "email",    dataType: "text"   },
+		]);
+
+		gridView.setColumns([
+            { name: "id",       fieldName: "id",       width:   "80" },
+            { name: "name",     fieldName: "name",     width:  "120" },
+            { name: "username", fieldName: "username", width:  "120" },
+            { name: "email",    fieldName: "email",    width:  "200" },
+		]);
+
+		$.getJSON("https://jsonplaceholder.typicode.com/users", function (data) {
+			console.log(data);
+			provider.fillJsonData(data, { fillMode: "set" });
+		});
+	});
+</script>

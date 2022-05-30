@@ -1,0 +1,91 @@
+
+<!--
+    lookup 컬럼
+    0, 1, 2 와 같이 데이터를 숫자로 표기한 것들을 lookup 컬럼을 사용해서
+    예, 아니요, 모름과 같은 것으로 변경하는 방법이다.
+
+    예제에서는 StatusCode가 어떤것을 의미하는지 변경해본다.
+-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link href="/lib/realgrid-style.css" rel="stylesheet" />
+		<link href="/lib/common.css" rel="stylesheet" />
+		<script type="text/javascript" src="/lib/realgrid-lic.js"></script>
+		<script type="text/javascript" src="/lib/realgrid.2.5.2.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-3.4.0.min.js"></script>
+	</head>
+	<body>
+		<div id="realgrid" style="width: 100%; height: 440px;">
+		</div>
+	</body>
+</html>
+
+<script>
+    const provider = new RealGrid.LocalDataProvider();
+    const gridView = new RealGrid.GridView("realgrid");
+    gridView.setDataSource(provider);
+
+    // 현재 변경 이벤트
+    gridView.onCurrentChanged = function(grid, cell) {
+        console.log(cell);
+        // 선택한 셀의 실제 값을 출력
+        console.log(gridView.getValue(cell.itemIndex, cell.column));
+    }
+
+    provider.setFields([
+		{ fieldName: "UserId" },
+		{ fieldName: "StatusCode" },
+		{ fieldName: "Age" },
+		{ fieldName: "Gender" },
+		{ fieldName: "MobilePhone" },
+		{ fieldName: "Email" },
+		{ fieldName: "AgeLabel" },
+    ]);
+
+    gridView.setColumns([
+		{ name: "UserId",      fieldName: "UserId",      width: "80" },
+        { 
+            name: "StatusCode",  fieldName: "StatusCode",  width: "80",
+            // lookup 설정
+            // 단점: 수정할 때 코드레벨에서 수정해야함
+            lookupDisplay: true,
+            values: ["0", "1", "2", "3", "4", "5"],
+            labels: ["비회원", "준회원", "정회원", "우수회원", "운영자", "관리자"],
+        },
+        { 
+            name: "Age",         fieldName: "Age",         width: "40",
+            // AgeLabel 컬럼 값으로 치환하기
+            // 단점: 서버에 데이터를 적재해야함
+            lookupDisplay: true,
+            labelField: "AgeLabel"
+        },
+        {
+            name: "Gender",      fieldName: "Gender",      width: "80",
+            // dropdown으로 수정 가능하게 하기
+            lookupDisplay: true,
+            values: ["M", "F"],
+            labels: ["남", "여"],
+            editor: {
+                type: "dropdown", // 드롭다운
+                dropDownCount: 2, // 갯수 지정
+                domainOnly: true, // 목록에서 지정한 것 이외는 수정 불가
+                values: ["M", "F"],
+                labels: ["남", "여"]
+            },
+        },
+
+		{ name: "MobilePhone", fieldName: "MobilePhone", width: "100" },
+		{ name: "Email", 	   fieldName: "Email",       width: "120" },
+		{ name: "AgeLabel",    fieldName: "AgeLabel",    width: "40" },
+    ]);
+
+    var data_url = 
+		"https://raw.githubusercontent.com/realgrid/" +
+    	"open-tutorial/main/datas/data-006.json";
+    $.getJSON(data_url, function (data) {
+        console.log(data);
+        provider.fillJsonData(data, { fillMode: "set" });
+    });
+</script>

@@ -1,0 +1,120 @@
+
+<!--
+    행 그룹
+    https://github.com/realgrid/open-tutorial/tree/main/docs/part-1/07
+-->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link href="/lib/realgrid-style.css" rel="stylesheet" />
+		<link href="/lib/common.css" rel="stylesheet" />
+		<script type="text/javascript" src="/lib/realgrid-lic.js"></script>
+		<script type="text/javascript" src="/lib/realgrid.2.5.2.min.js"></script>
+		<script type="text/javascript" src="/js/jquery-3.4.0.min.js"></script>
+	</head>
+	<body>
+        <div>
+            <button onclick="showPanel(true)">패널 보이기</button>
+            <button onclick="showPanel(false)">패널 감추기</button>
+        </div>    
+		<div id="realgrid" style="width: 100%; height: 440px;">
+		</div>
+	</body>
+</html>
+
+<script>
+    const provider = new RealGrid.LocalDataProvider();
+    const gridView = new RealGrid.GridView("realgrid");
+    gridView.setDataSource(provider);
+
+    provider.setFields([
+        { fieldName: "KorName",       dataType: "text" },
+        { fieldName: "Gender",        dataType: "text" },
+        { fieldName: "Age",           dataType: "number" },
+        { fieldName: "Phone",         dataType: "text" },
+        { fieldName: "ProductId",     dataType: "text" },
+        { fieldName: "KorCountry",    dataType: "text" },
+        { fieldName: "OrderDate",     dataType: "datetime" },
+        { fieldName: "SaveCost",      dataType: "number" },
+    ]);
+
+    gridView.setColumns([
+        { name: "KorName",            fieldName: "KorName",       width: "70" },
+        { name: "Gender",             fieldName: "Gender",        width: "50", 
+            groupFooter: [
+                { text: "합계", styleName: "orange-column"},
+                { text: "평균", styleName: "orange-column"},
+            ]
+        },
+        // 그룹 풋터 설정하기
+        { name: "Age",                fieldName: "Age",           width: "40",
+            groupFooter: [
+                { 
+                    valueCallback: callback,// 사용자 지정 함수 사용
+                    //expression: "avg", // 행그룹의 평균값
+                    styleName: "orange-column", // css 안의 스타일 적용
+                    //numberFormat: "#,##0.0", // 숫자 표기 포멧 지정
+                },
+                {
+                    valueCallback: callback,// 사용자 지정 함수 사용
+                    styleName: "orange-column", // css 안의 스타일 적용
+                },
+            ],
+            footer: { 
+                expression: "avg", // 전체 데이터의 평균값
+            }
+        },
+        { name: "Phone",              fieldName: "Phone",         width: "100" },
+        { name: "ProductId",          fieldName: "ProductId",     width: "120" },
+        { name: "KorCountry",         fieldName: "KorCountry",    width: "100" },
+        { name: "OrderDate",          fieldName: "OrderDate",     width: "100" },
+        { name: "SaveCost",           fieldName: "SaveCost",      width: "80" },
+    ]);
+
+    // 어떤 조건에 의해 그룹핑을 할지 말지에 대한 것을 정의
+    gridView.onGrouping = function(grid) {
+        return true; //  그룹핑 진행
+        //return false; // 그룹핑 중단
+    }
+
+    // 그룹핑이 완전히 끝났을 때 호출됨.
+    gridView.onGrouped = function(grid) {
+        alert("그룹핑이 완료되었습니다.");
+    }
+
+    function callback(grid, c, index, group, value) {
+        var model = grid.getGroupModel(group.index); // 계산하고 있는 값지정
+        switch(index) {
+            case 0: return grid.getGroupSummary(model, "Age").sum;
+            case 1: return grid.getGroupSummary(model, "Age").avg;
+        }
+    }
+
+    const data_url = "https://raw.githubusercontent.com/realgrid/open-tutorial/main/datas/data-002.json";
+    $.getJSON(data_url, function (data) {
+        console.log(data);
+        provider.fillJsonData(data, { fillMode: "set" });
+    });
+
+    // 소스코드로 그룹핑 하기
+    //gridView.groupBy(["Gender", "KorCountry"]);
+
+    gridView.groupBy(["Age"]);
+    /*
+    //그룹 헤더와 풋터 변경
+    gridView.setRowGroup({
+        headerStatement: "${groupField}",
+        footerStatement: "${rowCount} 건",
+    });
+    */
+   
+    // 그룹 푸터를 여러 줄로 표시하기
+    // 그룹 푸터가 여러개라면 setColumns의 설정도 여러개로 변경해주어야 한다.
+    gridView.rowGroup.setFooters([{}, {}]);
+
+    function showPanel(value) {
+        // groupPanel.visible 패널 on/off 기능
+        gridView.groupPanel.visible = value;
+    }
+</script>
